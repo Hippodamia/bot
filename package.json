@@ -1,0 +1,29 @@
+{
+  "name": "@hippodamia/bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Heer Harmog"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "test": "ts-node test.ts",
+    "publish": "yarn publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "eventemitter3": "^5.0.1",
+    "qq-guild-bot": "^2.9.5"
+  }
+}
