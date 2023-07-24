@@ -1,6 +1,7 @@
 import {EventEmitter} from 'eventemitter3'
 import {Command, parseCommand} from "./command";
 import {Context} from "./context";
+import {Adapter} from "./adapter";
 
 export interface CommandHandlerConfig {
     strict?: boolean
@@ -13,20 +14,21 @@ type BaseEventType = {
     },
     channel?: {
         id: string
-    }
+    },
+    platform?: string
 }
 type CommandEventType = { command: string } & BaseEventType
 type CommandExecEventType = { ctx: Context, args: string[] }
 
 type BotEventEmitterType = {
-    'command': (args: CommandEventType ) => void,
+    'command': (args: CommandEventType) => void,
     'command_exec': (args: CommandExecEventType) => void
 }
 
 export class Bot extends EventEmitter<BotEventEmitterType> {
     constructor() {
         super();
-        this.on("command", ({command, user, channel}) => {
+        this.on("command", ({platform, command, user, channel}) => {
             const ctx = new Context()
             ctx.rawContent = command
             let name = command.split(' ')[0];
@@ -45,6 +47,11 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
                     ctx.args = _args
                     ctx.user = user;
                     ctx.channel = channel;
+
+                    //select platform adapter
+                    if (platform)
+                        ctx.adapter = this.adapters.find(x => x.info.name == platform)
+
                     find.exec(ctx, copy);
                     this.emit('command_exec', {ctx, args: copy})
                 }
@@ -54,8 +61,16 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         })
     }
 
+    adapters: Adapter[] = []
 
     commands: Command[] = []
+
+    load(adapter: Adapter) {
+        if (!this.adapters.find(x => x.info.name == adapter.info.name)) {
+            this.adapters.push(adapter)
+            adapter.init?.(this);
+        }
+    }
 
     cmd(text: string, handler: Command['exec']) {
         let {command, lastSub} = parseCommand(text);

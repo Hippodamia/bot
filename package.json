@@ -1,6 +1,6 @@
 {
   "name": "@hippodamia/bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "MIT",
   "author": {
@@ -8,14 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/Hippodamia/bot"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "@hippodamia:registry": "https://npm.pkg.github.com/hippodamia"
   },
   "scripts": {
-    "test": "ts-node test.ts",
-    "publish": "yarn publish"
+    "test": "ts-node test.ts"
   },
   "devDependencies": {
     "@types/node": "^20.4.4",
@@ -24,6 +23,9 @@
   },
   "dependencies": {
     "eventemitter3": "^5.0.1",
-    "qq-guild-bot": "^2.9.5"
+    "fastify": "^4.20.0",
+    "node-fetch": "^2.6.12",
+    "qq-guild-bot": "^2.9.5",
+    "winston": "^3.10.0"
   }
 }
