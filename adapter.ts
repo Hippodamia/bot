@@ -1,5 +1,4 @@
 import {Bot} from "./bot";
-import {Logger} from "winston";
 
 export interface Adapter {
 

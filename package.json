@@ -1,7 +1,8 @@
 {
   "name": "@hippodamia/bot",
-  "version": "1.0.1",
-  "main": "index.js",
+  "version": "1.0.3",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "license": "MIT",
   "author": {
     "name": "Heer Harmog"
@@ -14,7 +15,8 @@
     "@hippodamia:registry": "https://npm.pkg.github.com/hippodamia"
   },
   "scripts": {
-    "test": "ts-node test.ts"
+    "test": "ts-node test.ts",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^20.4.4",
@@ -24,8 +26,9 @@
   "dependencies": {
     "eventemitter3": "^5.0.1",
     "fastify": "^4.20.0",
-    "node-fetch": "^2.6.12",
-    "qq-guild-bot": "^2.9.5",
-    "winston": "^3.10.0"
-  }
+    "node-fetch": "^2.6.12"
+  },
+  "files": [
+    "dist"
+  ]
 }
