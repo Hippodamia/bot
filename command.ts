@@ -12,7 +12,17 @@ export class Command {
     subCommands: Command[] = []
 
     exec: (context: Context, args: string[]) => void = (context, args) => {
-        throw new Error('undefined')
+         function getHelpList(command: Command): string[] {
+            const result = [];
+            for (const subCommand of command.subCommands) {
+                result.push(`${command.name} ${subCommand.name}`);
+                result.push(...getHelpList(subCommand));
+            }
+            return result;
+        }
+        if(this.showHelp){
+            context.reply(getHelpList(this).join('\n'))
+        }
     };
 
     constructor(name: string, args: CommandArgs = {}) {
@@ -41,6 +51,8 @@ export class Command {
             this.subCommands.push(command)
         }
     }
+
+    showHelp: boolean
 }
 
 // 必须以 /

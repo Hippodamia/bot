@@ -26,7 +26,8 @@
   "dependencies": {
     "eventemitter3": "^5.0.1",
     "fastify": "^4.20.0",
-    "node-fetch": "^2.6.12"
+    "node-fetch": "^2.6.12",
+    "quick.db": "^9.1.7"
   },
   "files": [
     "dist"

@@ -107,6 +107,7 @@
   },
   "exclude": [
     "adapters/*",
-    "test/*"
+    "test/*",
+    "test.ts"
   ]
 }
