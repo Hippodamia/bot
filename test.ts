@@ -1,6 +1,6 @@
 import {Bot} from "./bot";
 
-const bot = new Bot()
+const bot = new Bot({loggerLevel:'debug'})
 bot.cmd({command: '/dev fakeuser <count>', showHelp: true}, (ctx) => {
 
 })

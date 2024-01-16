@@ -2,7 +2,7 @@ import { EventEmitter } from 'eventemitter3'
 import { Command, parseCommand, RegexCommand } from "./command";
 import { Context } from "./context";
 import { Adapter } from "./adapter";
-import pino, { Logger } from 'pino'
+import pino, { Logger,LoggerOptions } from 'pino'
 import { colorizerFactory } from 'pino-pretty'
 export interface CommandConfig {
     strict?: boolean,
@@ -40,12 +40,12 @@ type BotEventEmitterType = {
 type BotMiddleware = (ctx: Context) => Promise<boolean | void>
 
 export class Bot extends EventEmitter<BotEventEmitterType> {
-    constructor() {
+    constructor(options:{loggerLevel:LoggerOptions['level']}={loggerLevel:'info'}) {
         super();
 
         //初始bot的logger
         this.logger = pino({
-            level: 'debug',
+            level: options.loggerLevel,
             transport: {
                 target: 'pino-pretty',
                 options: {

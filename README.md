@@ -23,6 +23,12 @@ bot.cmd('/help shop [page]', (ctx) => {
   console.log(`user:${ctx.user.name}, page: ${ctx.args.page}`)
 })
 
+// Register a command with regex
+bot.regex(/^(?<at>@.*\s*)?[.。][bB][oO][tT]\s*[oO][nN]\s*$/g,
+    (ctx)=>{
+        ctx.logger.info('bot on!')
+    })
+
 ```
 
 `bot.cmd()` is used to register a command listener. It accepts a command string and a callback function.
@@ -36,8 +42,7 @@ When that command is triggered, the callback is called and you get a `ctx` objec
 ## API
 
 - `bot.cmd(command, callback)` - Register a command
-- `bot.on(event, callback)` - Listen for an event
-- `bot.emit(event, data)` - Emit an event
+- `bot.regex(event, callback)` - Register a command with regex
 
 ## Objects
 
