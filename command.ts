@@ -1,14 +1,28 @@
 import {Context} from "./context";
+import exp from "node:constants";
 
 export interface CommandArgs {
     [key: string]: string;
 }
 
+class CommandBase{
+    name?: string;
+    exec: (context: Context, args: string[]) => void;
 
+}
+
+export class RegexCommand extends CommandBase{
+    regex: RegExp;
+    constructor( regex: RegExp) {
+        super();
+        this.regex = regex;
+    }
+
+}
 export class Command {
 
     name: string;
-    args: CommandArgs;
+    args: CommandArgs; //通常情况下，只有终结点命令才会有参数
     subCommands: Command[] = []
 
     exec: (context: Context, args: string[]) => void = (context, args) => {

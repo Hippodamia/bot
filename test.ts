@@ -7,16 +7,18 @@ bot.cmd({command: '/dev fakeuser <count>', showHelp: true}, (ctx) => {
 bot.cmd('/dev race player set', (ctx) => {
 
 })
-bot.cmd('/dev race player health set <count>', (ctx) => {
 
-})
-bot.cmd('/dev race player set die', (ctx) => {
+bot.regex(/^(?<at>@.*\s*)?[.。][bB][oO][tT]\s*[oO][nN]\s*$/g,
+    (ctx)=>{
+        ctx.logger.info('bot on!')
+        ctx.logger.debug('bot on debug')
+    })
 
-})
-bot.cmd('/dev coin', (ctx) => {
 
-})
-console.log(JSON.stringify( bot.getCommandChainWithString('/dev race player health set <count>')))
+bot.emit('command', {platform: 'fakeuser', command: '@heer .bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
+bot.emit('command', {platform: 'fakeuser', command: '.bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
+
+console.log(JSON.stringify( bot.getCommandChainWithString('/dev race player set')))
 //{"subCommands":[{"subCommands":[{"subCommands":[{"subCommands":[{"subCommands":[],"name":"set","args":{"count":""}}],"name":"health","args":{}}],"name":"player","args":{}}],"name":"race","args":{}}],"name":"dev","args":{}}
 console.log(JSON.stringify(bot.getEndCommandWithString('/dev race player health set <count>')))
 //{"subCommands":[],"name":"set","args":{"count":""}}
