@@ -1,4 +1,8 @@
 import { Bot } from "./bot";
+/**
+ * 用于收发消息的适配器
+ *
+ */
 export interface Adapter {
     info: {
         version: string;
@@ -8,6 +12,6 @@ export interface Adapter {
     send(content: string | string[], target: {
         channel?: string;
         user?: string;
-    }): any;
-    init?(bot: Bot): any;
+    }): void;
+    init?(bot: Bot): void;
 }

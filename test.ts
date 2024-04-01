@@ -15,8 +15,8 @@ bot.regex(/^(?<at>@.*\s*)?[.。][bB][oO][tT]\s*[oO][nN]\s*$/g,
     })
 
 
-bot.emit('command', {platform: 'fakeuser', command: '@heer .bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
-bot.emit('command', {platform: 'fakeuser', command: '.bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
+bot.emit('command', {platform: 'fakeuser', command_text: '@heer .bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
+bot.emit('command', {platform: 'fakeuser', command_text: '.bot on', user: {name: 'fakeuser', id: 'fakeuser'}, channel: {id: 'fakeuser'}})
 
 console.log(JSON.stringify( bot.getCommandChainWithString('/dev race player set')))
 //{"subCommands":[{"subCommands":[{"subCommands":[{"subCommands":[{"subCommands":[],"name":"set","args":{"count":""}}],"name":"health","args":{}}],"name":"player","args":{}}],"name":"race","args":{}}],"name":"dev","args":{}}

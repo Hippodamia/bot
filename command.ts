@@ -1,32 +1,40 @@
 import {Context} from "./context";
-import exp from "node:constants";
 
 export interface CommandArgs {
     [key: string]: string;
 }
 
-class CommandBase{
+class CommandBase {
     name?: string;
-    exec: (context: Context, args: string[]) => void;
+    exec!: (context: Context, args: string[]) => void;
 
 }
 
-export class RegexCommand extends CommandBase{
+export class RegexCommand extends CommandBase {
     regex: RegExp;
-    constructor( regex: RegExp) {
+
+    constructor(regex: RegExp) {
         super();
         this.regex = regex;
     }
 
 }
+
 export class Command {
 
     name: string;
     args: CommandArgs; //通常情况下，只有终结点命令才会有参数
     subCommands: Command[] = []
+    showHelp?: boolean = false
+
+    constructor(name: string, args: CommandArgs = {}) {
+        this.name = name[0] == '/' ? name.substring(1) : name;
+        this.args = args;
+        this.subCommands = [];
+    }
 
     exec: (context: Context, args: string[]) => void = (context, args) => {
-         function getHelpList(command: Command): string[] {
+        function getHelpList(command: Command): string[] {
             const result = [];
             for (const subCommand of command.subCommands) {
                 result.push(`${command.name} ${subCommand.name}`);
@@ -34,19 +42,11 @@ export class Command {
             }
             return result;
         }
-        if(this.showHelp){
+
+        if (this.showHelp) {
             context.reply(getHelpList(this).join('\n'))
         }
     };
-
-    constructor(name: string, args: CommandArgs = {}) {
-        this.name = name;
-        if (this.name[0] == '/') {
-            this.name = this.name.substring(1)
-        }
-        this.args = args;
-        this.subCommands = [];
-    }
 
     //insert and merge sub commands
     pushSubCommand(command: Command) {
@@ -65,11 +65,9 @@ export class Command {
             this.subCommands.push(command)
         }
     }
-
-    showHelp: boolean
 }
 
-// 必须以 /
+//
 export function parseCommand(text: string): { command: Command, lastSub: Command } {
     const parts = text.split(" ");
     const name = parts.shift()!; // 取出指令名

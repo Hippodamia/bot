@@ -1,9 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseCommand = exports.Command = void 0;
+exports.parseCommand = exports.Command = exports.RegexCommand = void 0;
+class CommandBase {
+}
+class RegexCommand extends CommandBase {
+    constructor(regex) {
+        super();
+        this.regex = regex;
+    }
+}
+exports.RegexCommand = RegexCommand;
 class Command {
     constructor(name, args = {}) {
         this.subCommands = [];
+        this.showHelp = false;
         this.exec = (context, args) => {
             function getHelpList(command) {
                 const result = [];
@@ -17,10 +27,7 @@ class Command {
                 context.reply(getHelpList(this).join('\n'));
             }
         };
-        this.name = name;
-        if (this.name[0] == '/') {
-            this.name = this.name.substring(1);
-        }
+        this.name = name[0] == '/' ? name.substring(1) : name;
         this.args = args;
         this.subCommands = [];
     }
@@ -44,7 +51,7 @@ class Command {
     }
 }
 exports.Command = Command;
-// 必须以 /
+//
 function parseCommand(text) {
     const parts = text.split(" ");
     const name = parts.shift(); // 取出指令名

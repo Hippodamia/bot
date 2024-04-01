@@ -1,6 +1,6 @@
 {
   "name": "@hippodamia/bot",
-  "version": "1.0.6",
+  "version": "1.1.1",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "license": "MIT",
