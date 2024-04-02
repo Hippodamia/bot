@@ -14,8 +14,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm i pnpm -g
-      - run: pnpm ci
+      - run: npm i 
+      - run: npm tsc
 
   publish-gpr:
     needs: build
@@ -29,8 +29,8 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-      - run: npm i pnpm -g
-      - run: pnpm ci
-      - run: pnpm publish
+      - run: npm i 
+      - run: npm tsc
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
