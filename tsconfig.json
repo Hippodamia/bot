@@ -108,7 +108,6 @@
   "exclude": [
     "adapters/*",
     "test/*",
-    "tests/test.ts",
     "./dist/**/*"
   ]
 }

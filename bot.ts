@@ -83,7 +83,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
             }
 
             // 常规的命令链 解析
-            let cmd = this.commands.find(x => x.name == name)
+            let cmd = this.commands.find(x => x.name == name || x.aliases?.includes(name))
             if (cmd) {
                 const {command: find, args, commandTree} = findMatchingSub(cmd, event.command_text.split(' ').slice(1)); //使用空格分隔解析命令树和参数
                 if (!find) return;
@@ -241,7 +241,7 @@ export function findMatchingSub(cmd: Command, text: string | string[]): {
     commandTree: Command
 } {
     let parts = Array.isArray(text) ? text : text.split(' ')
-    let sub = cmd.subCommands.find(x => x.name == parts[0]);
+    let sub = cmd.subCommands.find(x => x.name == parts[0] || x.aliases?.includes(parts[0]));
     if (!sub) {
         // is arg
         return {command: cmd, args: parts, commandTree: cmd}

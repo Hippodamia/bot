@@ -23,6 +23,7 @@ export class RegexCommand extends CommandBase {
 export class Command {
 
     name: string;
+    aliases?: string[]
     args: CommandArgs; //通常情况下，只有终结点命令才会有参数
     subCommands: Command[] = []
     showHelp?: boolean = false
@@ -67,11 +68,25 @@ export class Command {
     }
 }
 
-//
+
+/**
+ * 将文本解析为命令对象
+ * @param text
+ */
 export function parseCommand(text: string): { command: Command, lastSub: Command } {
-    const parts = text.split(" ");
+    const parts = text.split(' ');
     const name = parts.shift()!; // 取出指令名
-    const cmd = new Command(name);
+
+    let cmd:Command;
+    //这个地方会检测这个分隔的文本是不是含有|
+    //如果含有|，则会创建多个命令，并将第一个命令的别名设置为后面的命令名
+    if(name.includes('|')){
+        const [root,...aliases] = name.split('|')
+        cmd = new Command(root);
+        cmd.aliases = aliases;
+    }else{
+        cmd = new Command(name);
+    }
 
     let lastSub = cmd;
 
