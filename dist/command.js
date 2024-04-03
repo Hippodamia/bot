@@ -51,11 +51,24 @@ class Command {
     }
 }
 exports.Command = Command;
-//
+/**
+ * 将文本解析为命令对象
+ * @param text
+ */
 function parseCommand(text) {
-    const parts = text.split(" ");
+    const parts = text.split(' ');
     const name = parts.shift(); // 取出指令名
-    const cmd = new Command(name);
+    let cmd;
+    //这个地方会检测这个分隔的文本是不是含有|
+    //如果含有|，则会创建多个命令，并将第一个命令的别名设置为后面的命令名
+    if (name.includes('|')) {
+        const [root, ...aliases] = name.split('|');
+        cmd = new Command(root);
+        cmd.aliases = aliases;
+    }
+    else {
+        cmd = new Command(name);
+    }
     let lastSub = cmd;
     for (let i = 0; i < parts.length; i++) {
         let part = parts[i];

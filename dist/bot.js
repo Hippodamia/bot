@@ -48,7 +48,7 @@ class Bot extends eventemitter3_1.EventEmitter {
                 this.emit('command_exec', { ctx, args: result.slice(1) });
             }
             // 常规的命令链 解析
-            let cmd = this.commands.find(x => x.name == name);
+            let cmd = this.commands.find(x => { var _a; return x.name == name || ((_a = x.aliases) === null || _a === void 0 ? void 0 : _a.includes(name)); });
             if (cmd) {
                 const { command: find, args, commandTree } = findMatchingSub(cmd, event.command_text.split(' ').slice(1)); //使用空格分隔解析命令树和参数
                 if (!find)
@@ -197,7 +197,7 @@ class Bot extends eventemitter3_1.EventEmitter {
 exports.Bot = Bot;
 function findMatchingSub(cmd, text) {
     let parts = Array.isArray(text) ? text : text.split(' ');
-    let sub = cmd.subCommands.find(x => x.name == parts[0]);
+    let sub = cmd.subCommands.find(x => { var _a; return x.name == parts[0] || ((_a = x.aliases) === null || _a === void 0 ? void 0 : _a.includes(parts[0])); });
     if (!sub) {
         // is arg
         return { command: cmd, args: parts, commandTree: cmd };
