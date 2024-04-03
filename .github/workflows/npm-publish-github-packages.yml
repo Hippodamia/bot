@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - run: npm i --prod
+      - run: npm i
       - run: npx tsc
 
   publish-gpr:
@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-      - run: npm i --prod
+      - run: npm i 
       - run: npx tsc
       - run: npm publish
         env:
