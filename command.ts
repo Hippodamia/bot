@@ -1,5 +1,8 @@
 import {Context} from "./context";
 
+/**
+ * 命令参数类型?
+ */
 export interface CommandArgs {
     [key: string]: string;
 }
@@ -20,7 +23,7 @@ export class RegexCommand extends CommandBase {
 
 }
 
-export class Command {
+export class Command{
 
     name: string;
     aliases?: string[]
