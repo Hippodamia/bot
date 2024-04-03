@@ -114,6 +114,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         }
     }
 
+    
     cmd(config: CommandConfig, handler: Command['exec']): void;
     cmd(text: string, handler: Command['exec']): void;
     cmd(config: string | CommandConfig, handler: Command['exec']): void {
