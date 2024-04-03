@@ -12,6 +12,7 @@ export declare class RegexCommand extends CommandBase {
 }
 export declare class Command {
     name: string;
+    aliases?: string[];
     args: CommandArgs;
     subCommands: Command[];
     showHelp?: boolean;
@@ -19,6 +20,10 @@ export declare class Command {
     exec: (context: Context, args: string[]) => void;
     pushSubCommand(command: Command): void;
 }
+/**
+ * 将文本解析为命令对象
+ * @param text
+ */
 export declare function parseCommand(text: string): {
     command: Command;
     lastSub: Command;
