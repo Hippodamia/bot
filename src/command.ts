@@ -69,14 +69,15 @@ export class Command {
 }
 
 /**
- * 将文本解析为命令对象
+ * 将文本解析为命令对象链条
  * @param text
+ * @returns 如果无法解析则返回undefined
  */
 export function parseCommand(text: string): {
   command: Command;
   lastSub: Command;
 } {
-  const parts = text.split(" ");
+  const parts = text.trim().split(' ');
   const name = parts.shift()!; // 取出指令名
 
   let cmd: Command;

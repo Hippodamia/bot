@@ -184,7 +184,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
      * @returns 只有当bot已注注册命令链才会有正确的返回值。
      */
     public getCommandChainWithString(cmd: string) {
-        let chain: Command | undefined = undefined
+        let chain: Command | undefined = undefined //这就是最后需要返回的Chain
         let {command} = parseCommand(cmd);
         let search_list = this.commands;
         let find = {} as Command | undefined
@@ -232,8 +232,6 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
             this.commands.push(cmd)
         }
     }
-
-
 }
 
 export function findMatchingSub(cmd: Command, text: string | string[]): {
