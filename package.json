@@ -11,9 +11,6 @@
     "type": "git",
     "url": "https://github.com/Hippodamia/bot"
   },
-  "publishConfig": {
-    "@hippodamia:registry": "https://npm.pkg.github.com/hippodamia"
-  },
   "scripts": {
     "test": "jest ",
     "build": "tsc"
