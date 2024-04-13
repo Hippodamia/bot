@@ -1,8 +1,8 @@
-import {EventEmitter} from 'eventemitter3'
-import {Command, parseCommand, RegexCommand} from "./command";
-import {Context} from "./context";
-import {Adapter} from "./adapter";
-import pino, {Logger, LoggerOptions} from 'pino'
+import { EventEmitter } from 'eventemitter3'
+import { Command, parseCommand, RegexCommand } from "./command";
+import { Context } from "./context";
+import { Adapter } from "./adapter";
+import { BaseLogger } from './types';
 
 export interface CommandConfig {
     strict?: boolean,
@@ -10,7 +10,7 @@ export interface CommandConfig {
     showHelp?: boolean
 }
 
-type BaseEventType = Pick<Context,'user'|'channel'>&{
+type BaseEventType = Pick<Context, 'user' | 'channel'> & {
     platform?: string
 }
 
@@ -32,6 +32,7 @@ type BotEventEmitterType = {
     'command_exec': (event: CommandExecEventType) => void
 }
 
+/** TODO 还没做完*/
 type BotMiddleware = (ctx: Context) => Promise<boolean | void>
 
 export class Bot extends EventEmitter<BotEventEmitterType> {
@@ -39,23 +40,15 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
     commands: Command[] = []
     regexCommands: RegexCommand[] = []
     middlewares: BotMiddleware[] = []
-    logger: Logger;
+    logger: BaseLogger;
 
-    constructor(options: { loggerLevel: LoggerOptions['level'] } = {loggerLevel: 'info'}) {
+    constructor(options: { logger: BaseLogger }) {
         super();
 
         //初始bot的logger
-        this.logger = pino({
-            level: options.loggerLevel,
-            transport: {
-                target: 'pino-pretty',
-                options: {
-                    colorize: true
-                }
-            },
-        })
+        this.logger = options.logger;
 
-        this.on("command", (event:CommandEventType) => {
+        this.on("command", (event: CommandEventType) => {
             const ctx = new Context(event.user, this, event.command_text, this.logger)
 
             ctx.channel = event.channel;
@@ -79,13 +72,13 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
                     continue // 跳过无结果匹配
                 ctx.args = result.groups;
                 cmd.exec(ctx, result.slice(1));
-                this.emit('command_exec', {ctx, args: result.slice(1)})
+                this.emit('command_exec', { ctx, args: result.slice(1) })
             }
 
-            // 常规的命令链 解析
+            // 常规的命令链解析
             let cmd = this.commands.find(x => x.name == name || x.aliases?.includes(name))
             if (cmd) {
-                const {command: find, args, commandTree} = findMatchingSub(cmd, event.command_text.split(' ').slice(1)); //使用空格分隔解析命令树和参数
+                const { command: find, args, commandTree } = findMatchingSub(cmd, event.command_text.split(' ').slice(1)); //使用空格分隔解析命令树和参数
                 if (!find) return;
                 let copy = args.slice(0);
                 let _args: { [key: string]: string } = {};
@@ -97,7 +90,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
                 if (event.platform)
                     ctx.adapter = this.adapters.find(x => x.info.name == event.platform)
                 find.exec(ctx, copy);
-                this.emit('command_exec', {ctx, args: copy})
+                this.emit('command_exec', { ctx, args: copy })
             }
         })
     }
@@ -114,7 +107,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         }
     }
 
-    
+
     cmd(config: CommandConfig, handler: Command['exec']): void;
     cmd(text: string, handler: Command['exec']): void;
     cmd(config: string | CommandConfig, handler: Command['exec']): void {
@@ -124,7 +117,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         } else {
             text = config.command
         }
-        let {command, lastSub} = parseCommand(text);
+        let { command, lastSub } = parseCommand(text);
 
         lastSub.exec = handler;
         if (typeof config != 'string') {
@@ -185,7 +178,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
      */
     public getCommandChainWithString(cmd: string) {
         let chain: Command | undefined = undefined //这就是最后需要返回的Chain
-        let {command} = parseCommand(cmd);
+        let { command } = parseCommand(cmd);
         let search_list = this.commands;
         let find = {} as Command | undefined
         let last_find = {} as Command
@@ -243,9 +236,9 @@ export function findMatchingSub(cmd: Command, text: string | string[]): {
     let sub = cmd.subCommands.find(x => x.name == parts[0] || x.aliases?.includes(parts[0]));
     if (!sub) {
         // is arg
-        return {command: cmd, args: parts, commandTree: cmd}
+        return { command: cmd, args: parts, commandTree: cmd }
     } else {
-        const {command, args, commandTree} = findMatchingSub(sub, parts.slice(1));
-        return {command, args, commandTree: cmd}
+        const { command, args, commandTree } = findMatchingSub(sub, parts.slice(1));
+        return { command, args, commandTree: cmd }
     }
 }

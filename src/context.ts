@@ -1,7 +1,7 @@
 import {Bot} from "./bot";
 import {Adapter} from "./adapter";
 import {Command} from "./command";
-import {Logger} from "pino";
+import { BaseLogger } from "./types";
 
 export class Context {
 
@@ -48,9 +48,9 @@ export class Context {
     /**
      * 日志输出工具
      */
-    logger: Logger;
+    logger: BaseLogger;
 
-    constructor(user: Context['user'],bot:Bot,raw:string, logger: Logger) {
+    constructor(user: Context['user'],bot:Bot,raw:string, logger: BaseLogger) {
         this.user = user
         this.bot = bot
         this.rawContent = raw
