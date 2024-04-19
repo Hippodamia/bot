@@ -26,15 +26,23 @@ export class Command {
   aliases?: string[];
   args: CommandArgs; //通常情况下，只有终结点命令才会有参数
   subCommands: Command[] = [];
-  showHelp?: boolean = false;
 
+  /** ignoreSpace: 是否忽略空格 */
+  ignoreSpace?: boolean = false;
+
+
+  /**
+   * 在输入到此命令时，如果本身无处理函数，是否显示帮助信息
+   */
+  showHelp?: boolean = false;
   constructor(name: string, args: CommandArgs = {}) {
     this.name = name[0] == "/" ? name.substring(1) : name;
     this.args = args;
     this.subCommands = [];
   }
 
-  exec: (context: Context, args: string[]) => void = (context, args) => {
+  /** 指令的默认处理函数为显示帮助信息 */
+  exec: CommandBase['exec'] = (context, args) => {
     function getHelpList(command: Command): string[] {
       const result = [];
       for (const subCommand of command.subCommands) {
@@ -49,7 +57,7 @@ export class Command {
     }
   };
 
-  //insert and merge sub commands
+  /** insert and merge sub commands */
   pushSubCommand(command: Command) {
     const findCommand = (name: string) => {
       return this.subCommands.find((c) => c.name === name);
@@ -69,7 +77,7 @@ export class Command {
 }
 
 /**
- * 将文本解析为命令对象链条
+ * 将文本解析为命令对象链
  * @param text
  * @returns 如果无法解析则返回undefined
  */

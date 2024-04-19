@@ -29,5 +29,5 @@ export interface BaseLogger {
     /**
      * Noop function.
      */
-    silent: LoggerFn;
+    silent?: LoggerFn;
 }

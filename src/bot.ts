@@ -5,9 +5,16 @@ import { Adapter } from "./adapter";
 import { BaseLogger } from './types';
 
 export interface CommandConfig {
+    /** 是否严格匹配指令 */
     strict?: boolean,
+    /** 指令语句 */
     command: string,
-    showHelp?: boolean
+    /** 命令 */
+    showHelp?: boolean,
+    /** 别名 */
+    alias?: string[],
+    /** 最后的命令和参数之间允许忽略空格 */
+    ignoreSpace?: boolean,
 }
 
 type BaseEventType = Pick<Context, 'user' | 'channel'> & {
@@ -53,9 +60,10 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
 
             ctx.channel = event.channel;
 
-            let name = event.command_text.split(' ')[0]; // 获取command chain的header
-            if (name[0] == '/')
-                name = name.substring(1);
+            let command_text = event.command_text.trim()
+            if (command_text.startsWith('/')) {
+                command_text = command_text.slice(1)
+            }
 
             //正则模式解析
 
@@ -64,7 +72,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
                 x.regex.lastIndex = 0
             })
 
-            let regex_cmd_list = this.regexCommands.filter(x => x.regex.test(event.command_text)) //匹配满足正则条件的所有正则命令事件
+            let regex_cmd_list = this.regexCommands.filter(x => x.regex.test(command_text)) //匹配满足正则条件的所有正则命令事件
             for (let cmd of regex_cmd_list) {
                 cmd.regex.lastIndex = 0;
                 let result = cmd.regex.exec(event.command_text) //执行命令事件
@@ -76,22 +84,22 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
             }
 
             // 常规的命令链解析
-            let cmd = this.commands.find(x => x.name == name || x.aliases?.includes(name))
-            if (cmd) {
-                const { command: find, args, commandTree } = findMatchingSub(cmd, event.command_text.split(' ').slice(1)); //使用空格分隔解析命令树和参数
-                if (!find) return;
-                let copy = args.slice(0);
-                let _args: { [key: string]: string } = {};
-                for (let key of Object.keys(find.args)) {
-                    _args[key] = args.shift() ?? ''
-                }
-                ctx.args = _args
-                ctx.command = commandTree;
-                if (event.platform)
-                    ctx.adapter = this.adapters.find(x => x.info.name == event.platform)
-                find.exec(ctx, copy);
-                this.emit('command_exec', { ctx, args: copy })
+
+
+            const { command: find, args, commandChain } = findMatchingSub(undefined, this.commands, command_text); //使用空格分隔解析命令树和参数
+            if (!find) return;
+            let copy = args.slice(0);
+            let _args: { [key: string]: string } = {};
+            for (let key of Object.keys(find.args)) {
+                _args[key] = args.shift() ?? '' //按顺序
             }
+            ctx.args = _args
+            ctx.command = commandChain;
+            if (event.platform)
+                ctx.adapter = this.adapters.find(x => x.info.name == event.platform)
+            find.exec(ctx, copy);
+            this.emit('command_exec', { ctx, args: copy })
+
         })
     }
 
@@ -122,6 +130,8 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         lastSub.exec = handler;
         if (typeof config != 'string') {
             lastSub.showHelp = config.showHelp ?? false;
+            lastSub.aliases = config.alias ?? [];
+            lastSub.ignoreSpace = config.ignoreSpace ?? false;
         }
         this.mergeCommands(command);
     }
@@ -227,18 +237,80 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
     }
 }
 
-export function findMatchingSub(cmd: Command, text: string | string[]): {
-    command: Command,
+/**
+ * 从给定的`Command`列表中寻找匹配的子命令，并返回整个命令链(的Header)
+ * 如果`Command`的`IgnoreSpace`为`true`，则在子命令匹配参数时允许忽略空格
+ * 
+ * @param header Command Chain的Header，Chain应该是只有单一sub的命令，所以会寻找最后的子命令进行处理操作
+ * @param cmds 
+ * @param text 
+ * @returns 如果找不到则为`undefined`
+ */
+export function findMatchingSub(header: Command | undefined, cmds: Command[], text: string | string[]): {
+    command: Command | undefined,
     args: string[],
-    commandTree: Command
+    commandChain: Command | undefined
 } {
-    let parts = Array.isArray(text) ? text : text.split(' ')
-    let sub = cmd.subCommands.find(x => x.name == parts[0] || x.aliases?.includes(parts[0]));
+    //console.log('findMatchingSub', header, text)
+    let parts = Array.isArray(text) ? text : text.split(' ') ?? [text]
+    let matchText = parts[0]
+
+    let sub: Command | undefined = undefined
+
+
+    for (const command of cmds) {
+        if (matchText == command.name || command.aliases?.includes(matchText)) {
+            sub = command
+            parts = parts.slice(1)
+            break;
+        }
+    }
+
     if (!sub) {
-        // is arg
-        return { command: cmd, args: parts, commandTree: cmd }
-    } else {
-        const { command, args, commandTree } = findMatchingSub(sub, parts.slice(1));
-        return { command, args, commandTree: cmd }
+        // 使用ignoreSpace来继续判断
+        for (const command of cmds) {
+            if (matchText.includes(command.name)) {
+                sub = command
+                parts[0] = parts[0].replace(command.name, '')
+                break
+            }
+            const aliasFind = command.aliases?.find(x => matchText.includes(x))
+            if (aliasFind) {
+                sub = command
+                parts[0] = parts[0].replace(aliasFind, '')
+                break
+            }
+        }
+    }
+
+
+
+    if (!sub) {
+        if (header) {
+            let lastSub = header
+            while (lastSub.subCommands.length > 0) {
+                lastSub = lastSub.subCommands[0]
+            }
+            return { command: lastSub, args: parts, commandChain: header }
+        }
+        return { command: undefined, args: parts, commandChain: header }
+    }
+    else {
+        const sub_commands = sub.subCommands
+        if (!header) {
+            header = sub
+            header.subCommands = []
+        }
+        else {
+            // get last sub command
+            let lastSub = header
+            while (lastSub.subCommands.length > 0) {
+                lastSub = lastSub.subCommands[0]
+            }
+            sub.subCommands = []
+            lastSub.subCommands = [sub]
+        }
+        const { command, args, commandChain } = findMatchingSub(header, sub_commands, parts);
+        return { command, args, commandChain: commandChain }
     }
 }
