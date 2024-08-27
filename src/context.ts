@@ -66,7 +66,7 @@ export class Context {
     }
 
     /**
-     * 语法糖
+    
      * 快速进行回复，只能采用字符串数组进行简单的文本回复，不会有任何拼接
      * @param content
      */
