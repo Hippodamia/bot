@@ -19,6 +19,7 @@ export interface CommandConfig {
 
 type BaseEventType = Pick<Context, 'user' | 'channel'> & {
     platform?: string
+    msg_id?:string
 }
 
 

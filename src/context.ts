@@ -50,7 +50,15 @@ export class Context {
      */
     logger: BaseLogger;
 
-    constructor(user: Context['user'],bot:Bot,raw:string, logger: BaseLogger) {
+    /**
+     * 可选的消息id
+     */
+    msg_id?: string;
+
+    constructor(user: Context['user'],
+    bot:Bot,raw:string, 
+    logger: BaseLogger,) 
+    {
         this.user = user
         this.bot = bot
         this.rawContent = raw
