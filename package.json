@@ -23,11 +23,9 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
-    "eventemitter3": "^5.0.1",
-    "pino-pretty": "^10.3.1"
+    "eventemitter3": "^5.0.1"
   },
   "files": [
     "dist"
-  ],
-  "packageManager": "pnpm@8.15.6+sha256.01c01eeb990e379b31ef19c03e9d06a14afa5250b82e81303f88721c99ff2e6f"
+  ]
 }
