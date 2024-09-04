@@ -59,6 +59,8 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         this.on("command", (event: CommandEventType) => {
             const ctx = new Context(event.user, this, event.command_text, this.logger)
 
+            ctx.msg_id = event.msg_id;
+
             ctx.channel = event.channel;
 
             let command_text = event.command_text.trim()
