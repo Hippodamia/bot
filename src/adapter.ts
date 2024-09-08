@@ -1,4 +1,4 @@
-import {Bot} from "./bot";
+import { Bot } from "./bot";
 
 /**
  * 用于收发消息的适配器
@@ -26,6 +26,13 @@ export interface Adapter {
      * @param target 
      */
     send(content: string, target: { channel?: string, user?: string }): void
+
+    /**
+     * 码API
+     */
+    code: {
+        at(target: string): string
+    }
 
     /**
      * 初始化适配器
