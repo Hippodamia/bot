@@ -57,52 +57,11 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         this.logger = options.logger;
 
         this.on("command", (event: CommandEventType) => {
-            const ctx = new Context(event.user, this, event.command_text, this.logger)
+            const ctx = this.createContext(event);
+            const normalizedText = this.normalizeCommandText(event.command_text);
 
-            ctx.msg_id = event.msg_id;
-
-            ctx.channel = event.channel;
-
-            let command_text = event.command_text.trim()
-            if (command_text.startsWith('/')) {
-                command_text = command_text.slice(1)
-            }
-
-            //正则模式解析
-
-            this.regexCommands.forEach(x => {
-                //重置所有正则游标
-                x.regex.lastIndex = 0
-            })
-
-            let regex_cmd_list = this.regexCommands.filter(x => x.regex.test(command_text)) //匹配满足正则条件的所有正则命令事件
-            for (let cmd of regex_cmd_list) {
-                cmd.regex.lastIndex = 0;
-                let result = cmd.regex.exec(event.command_text) //执行命令事件
-                if (!result)
-                    continue // 跳过无结果匹配
-                ctx.args = result.groups;
-                cmd.exec(ctx, result.slice(1));
-                this.emit('command_exec', { ctx, args: result.slice(1) })
-            }
-
-            // 常规的命令链解析
-
-
-            const { command: find, args, commandChain } = findMatchingSub(undefined, this.commands, command_text); //使用空格分隔解析命令树和参数
-            if (!find) return;
-            let copy = args.slice(0);
-            let _args: { [key: string]: string } = {};
-            for (let key of Object.keys(find.args)) {
-                _args[key] = args.shift() ?? '' //按顺序
-            }
-            ctx.args = _args
-            ctx.command = commandChain;
-            if (event.platform)
-                ctx.adapter = this.adapters.find(x => x.info.name == event.platform)
-            find.exec(ctx, copy);
-            this.emit('command_exec', { ctx, args: copy })
-
+            this.processRegexCommands(ctx, event.command_text, normalizedText);
+            this.executeCommandChain(ctx, normalizedText);
         })
     }
 
@@ -169,19 +128,7 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
      * @param cmd
      */
     public getEndCommandWithString(cmd: string): Command | undefined {
-        function getLastCommand(command?: Command) {
-            if (!command)
-                return undefined
-            // 检查是否存在子命令
-            if (command.subCommands.length === 0) {
-                return command;
-            } else {
-                // 递归迭代子命令
-                return getLastCommand(command.subCommands[0]);
-            }
-        }
-
-        return getLastCommand(this.getCommandChainWithString(cmd))
+        return this.getLastSubCommand(this.getCommandChainWithString(cmd));
     }
 
     /**
@@ -237,6 +184,76 @@ export class Bot extends EventEmitter<BotEventEmitterType> {
         } else {
             this.commands.push(cmd)
         }
+    }
+
+    private createContext(event: CommandEventType): Context {
+        const ctx = new Context(event.user, this, event.command_text, this.logger);
+        ctx.msg_id = event.msg_id;
+        ctx.channel = event.channel;
+        ctx.adapter = this.findAdapter(event.platform);
+        return ctx;
+    }
+
+    private normalizeCommandText(text: string): string {
+        let commandText = text.trim();
+        if (commandText.startsWith('/')) {
+            commandText = commandText.slice(1);
+        }
+        return commandText;
+    }
+
+    private processRegexCommands(ctx: Context, originalText: string, normalizedText: string): void {
+        for (const command of this.regexCommands) {
+            const match = this.tryMatchRegexCommand(command, originalText, normalizedText);
+            if (!match) continue;
+
+            ctx.args = match.groups ?? undefined;
+            command.exec(ctx, match.slice(1));
+            this.emit('command_exec', { ctx, args: match.slice(1) });
+        }
+    }
+
+    private tryMatchRegexCommand(command: RegexCommand, originalText: string, normalizedText: string): RegExpExecArray | undefined {
+        command.regex.lastIndex = 0;
+        if (!command.regex.test(normalizedText)) {
+            return undefined;
+        }
+        command.regex.lastIndex = 0;
+        return command.regex.exec(originalText) ?? undefined;
+    }
+
+    private executeCommandChain(ctx: Context, commandText: string): void {
+        const { command: matchedCommand, args, commandChain } = findMatchingSub(undefined, this.commands, commandText);
+        if (!matchedCommand) return;
+
+        const { namedArgs, remainingArgs } = this.splitArgs(matchedCommand, args);
+        ctx.args = namedArgs;
+        ctx.command = commandChain;
+
+        matchedCommand.exec(ctx, remainingArgs);
+        this.emit('command_exec', { ctx, args: remainingArgs });
+    }
+
+    private splitArgs(command: Command, args: string[]): { namedArgs: { [key: string]: string }, remainingArgs: string[] } {
+        const remainingArgs = args.slice(0);
+        const namedArgs: { [key: string]: string } = {};
+        for (const key of Object.keys(command.args)) {
+            namedArgs[key] = remainingArgs.shift() ?? '';
+        }
+        return { namedArgs, remainingArgs };
+    }
+
+    private getLastSubCommand(command?: Command): Command | undefined {
+        let current = command;
+        while (current && current.subCommands.length > 0) {
+            current = current.subCommands[0];
+        }
+        return current;
+    }
+
+    private findAdapter(platform?: string): Adapter | undefined {
+        if (!platform) return undefined;
+        return this.adapters.find(x => x.info.name == platform);
     }
 }
 
