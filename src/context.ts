@@ -72,7 +72,7 @@ export class Context {
      */
     reply(...content: string[]) {
         let text = content.join('')
-        this.adapter?.send(text, {channel: this.channel?.id, user: this.user.id})
+        this.adapter?.send(text, {channel: this.channel?.id, user: this.user.id}, this.msg_id)
     }
 
 

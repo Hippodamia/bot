@@ -24,8 +24,9 @@ export interface Adapter {
      * 
      * @param content 待发送的内容
      * @param target 
+     * @param msg_id 消息ID，用于回复特定消息
      */
-    send(content: string, target: { channel?: string, user?: string }): void
+    send(content: string, target: { channel?: string, user?: string }, msg_id?: string): void
 
     /**
      * 码API
